@@ -30,7 +30,6 @@ export default function GameFormPage() {
     if (isEdit && id) {
       getGameById(Number(id)).then(game => {
         if (!game) return;
-        // Reconstrução simples — busca IDs via nomes (simplificado para fins acadêmicos)
         setForm(prev => ({
           ...prev,
           titulo: game.titulo,

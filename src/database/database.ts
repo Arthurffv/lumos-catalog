@@ -1,10 +1,5 @@
 import { Pool, PoolClient, QueryResult } from 'pg';
 
-// =============================================================
-//  CONFIGURAÇÃO DA POOL DE CONEXÃO
-//  Todas as credenciais vêm de variáveis de ambiente (.env).
-//  Nunca exponha senhas diretamente no código-fonte.
-// =============================================================
 
 const pool = new Pool({
   host:     process.env.DB_HOST     ?? 'localhost',
@@ -13,13 +8,12 @@ const pool = new Pool({
   user:     process.env.DB_USER     ?? 'postgres',
   password: process.env.DB_PASSWORD ?? '',
 
-  // --- Configurações da pool ---
-  max:                    10,    // conexões simultâneas máximas
-  idleTimeoutMillis:   30_000,   // remove conexões ociosas após 30 s
-  connectionTimeoutMillis: 2_000, // lança erro se não conectar em 2 s
+  max:                    10,
+  idleTimeoutMillis:   30_000,
+  connectionTimeoutMillis: 2_000,
 });
 
-// Eventos de ciclo de vida da pool
+
 pool.on('connect', (_client: PoolClient) => {
   console.log('[DB] Nova conexão estabelecida com o PostgreSQL.');
 });
@@ -29,9 +23,7 @@ pool.on('error', (err: Error) => {
   process.exit(-1);
 });
 
-// =============================================================
-//  FUNÇÃO AUXILIAR: testa a conectividade ao iniciar o servidor
-// =============================================================
+
 export async function testConnection(): Promise<void> {
   let client: PoolClient | undefined;
   try {
@@ -49,8 +41,5 @@ export async function testConnection(): Promise<void> {
   }
 }
 
-// =============================================================
-//  EXPORTAÇÃO
-//  A pool é um singleton: importada por todos os repositórios.
-// =============================================================
+
 export default pool;

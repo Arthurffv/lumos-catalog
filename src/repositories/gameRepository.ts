@@ -1,24 +1,19 @@
 import { PoolClient, QueryResult } from 'pg';
 import pool from '../database/database';
 
-// =============================================================
-//  TIPOS / DTOs
-// =============================================================
 
-/** Payload recebido pelo serviço para inserir um novo jogo. */
 export interface GameInsertDTO {
   titulo:             string;
-  duracao_media?:     number | null;    // em horas
+  duracao_media?:     number | null;
   categoria?:         string | null;
   id_desenvolvedora?: number | null;
   id_distribuidora?:  number | null;
-  data_lancamento?:   string | null;    // ISO 8601: 'YYYY-MM-DD'
+  data_lancamento?:   string | null;
   id_classificacao?:  number | null;
-  ids_generos?:       number[];         // associações N:M
-  ids_plataformas?:   number[];         // associações N:M
+  ids_generos?:       number[]; 
+  ids_plataformas?:   number[]; 
 }
 
-/** Linha retornada pela query de listagem (após JOINs + agregação). */
 export interface GameRow {
   id:              number;
   titulo:          string;
@@ -28,14 +23,11 @@ export interface GameRow {
   distribuidora:   string | null;
   data_lancamento: string | null;
   classificacao:   string | null;
-  generos:         string | null;    // ex: "Ação, Aventura, RPG"
-  plataformas:     string | null;    // ex: "PC, PS5"
+  generos:         string | null;
+  plataformas:     string | null;
 }
 
 
-// =============================================================
-//  INSERT: Inserir um jogo completo (com transação)
-// =============================================================
 
 /**
  * Insere um jogo e suas associações N:M (gêneros e plataformas)
@@ -45,19 +37,11 @@ export interface GameRow {
  * @throws  Lança o erro original após executar ROLLBACK.
  */
 export async function insertGame(data: GameInsertDTO): Promise<number> {
-  // Obtemos um cliente dedicado da pool para controlar a transação manualmente
+ 
   const client: PoolClient = await pool.connect();
 
   try {
-    // ----------------------------------------------------------
-    // PASSO 0 – Iniciar transação
-    // ----------------------------------------------------------
     await client.query('BEGIN');
-
-    // ----------------------------------------------------------
-    // PASSO 1 – Inserir a linha principal na tabela 'jogos'
-    //   $1 … $7 → parâmetros parametrizados (previnem SQL Injection)
-    // ----------------------------------------------------------
     const insertGameSQL = `
       INSERT INTO jogos (
         titulo,
@@ -87,10 +71,6 @@ export async function insertGame(data: GameInsertDTO): Promise<number> {
 
     const newGameId = gameResult.rows[0].id;
 
-    // ----------------------------------------------------------
-    // PASSO 2 – Inserir relações N:M com Gêneros
-    //   ON CONFLICT … DO NOTHING: idempotente (sem erro duplicado)
-    // ----------------------------------------------------------
     if (data.ids_generos && data.ids_generos.length > 0) {
       const insertGenreSQL = `
         INSERT INTO jogo_genero (id_jogo, id_genero)
@@ -102,9 +82,6 @@ export async function insertGame(data: GameInsertDTO): Promise<number> {
       }
     }
 
-    // ----------------------------------------------------------
-    // PASSO 3 – Inserir relações N:M com Plataformas
-    // ----------------------------------------------------------
     if (data.ids_plataformas && data.ids_plataformas.length > 0) {
       const insertPlatformSQL = `
         INSERT INTO jogo_plataforma (id_jogo, id_plataforma)
@@ -116,42 +93,23 @@ export async function insertGame(data: GameInsertDTO): Promise<number> {
       }
     }
 
-    // ----------------------------------------------------------
-    // PASSO 4 – Confirmar transação
-    // ----------------------------------------------------------
     await client.query('COMMIT');
 
     console.log(`[GameRepository] Jogo inserido com sucesso. ID: ${newGameId}`);
     return newGameId;
 
   } catch (error) {
-    // Em qualquer falha: desfaz tudo para manter consistência
     await client.query('ROLLBACK');
     console.error('[GameRepository] Transação revertida (ROLLBACK):', error);
     throw error;
 
   } finally {
-    // Sempre devolver o cliente à pool, com ou sem erro
     client.release();
   }
 }
 
 
-// =============================================================
-//  SELECT: Listar todos os jogos com dados completos
-// =============================================================
 
-/**
- * Retorna todos os jogos com informações de desenvolvedora,
- * distribuidora, classificação, gêneros e plataformas.
- *
- * Técnicas SQL utilizadas:
- *  - LEFT JOIN:      preserva jogos sem associações opcionais
- *  - STRING_AGG:     agrega múltiplos gêneros/plataformas em uma string
- *  - DISTINCT:       evita duplicatas na agregação
- *  - TO_CHAR:        formata a data como 'YYYY-MM-DD'
- *  - GROUP BY:       obrigatório por causa do STRING_AGG
- */
 export async function listGames(): Promise<GameRow[]> {
   const listGamesSQL = `
     SELECT
@@ -188,17 +146,7 @@ export async function listGames(): Promise<GameRow[]> {
 }
 
 
-// =============================================================
-//  SELECT: Buscar um único jogo pelo ID
-// =============================================================
 
-/**
- * Retorna um jogo específico com todos os seus detalhes,
- * ou null caso o ID não exista.
- *
- * Usa a mesma estrutura de JOINs da listagem, com filtro WHERE.
- * O parâmetro $1 é enviado de forma segura pelo driver pg.
- */
 export async function getGameById(id: number): Promise<GameRow | null> {
   const getGameSQL = `
     SELECT
@@ -235,9 +183,7 @@ export async function getGameById(id: number): Promise<GameRow | null> {
 }
 
 
-// =============================================================
-//  UPDATE: Atualizar um jogo existente (com transação)
-// =============================================================
+
 export async function updateGame(id: number, data: GameInsertDTO): Promise<boolean> {
   const client: PoolClient = await pool.connect();
   try {
@@ -258,7 +204,7 @@ export async function updateGame(id: number, data: GameInsertDTO): Promise<boole
 
     if ((result.rowCount ?? 0) === 0) { await client.query('ROLLBACK'); return false; }
 
-    // Recria as associações N:M
+  
     await client.query('DELETE FROM jogo_genero WHERE id_jogo=$1;', [id]);
     await client.query('DELETE FROM jogo_plataforma WHERE id_jogo=$1;', [id]);
 
@@ -279,9 +225,6 @@ export async function updateGame(id: number, data: GameInsertDTO): Promise<boole
   }
 }
 
-// =============================================================
-//  DELETE: Remover um jogo (CASCADE cuida das tabelas N:M)
-// =============================================================
 export async function deleteGame(id: number): Promise<boolean> {
   const result = await pool.query('DELETE FROM jogos WHERE id=$1;', [id]);
   return (result.rowCount ?? 0) > 0;

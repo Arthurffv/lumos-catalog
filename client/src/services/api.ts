@@ -2,7 +2,6 @@ import type { Game, Developer, Publisher, Platform, Genre, Rating, GameFormData 
 
 const API = '/api';
 
-// ── helpers ────────────────────────────────────────────────────
 async function http<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -18,7 +17,6 @@ const json = (body: unknown) => ({
   body: JSON.stringify(body),
 });
 
-// ── JOGOS ──────────────────────────────────────────────────────
 export const getGames      = ()        => http<Game[]>(`${API}/games`);
 export const getGameById   = (id: number) => http<Game>(`${API}/games/${id}`);
 export const createGame    = (data: GameFormData) =>
@@ -40,17 +38,17 @@ export const updateGame    = (id: number, data: GameFormData) =>
 export const deleteGame    = (id: number) =>
   http<void>(`${API}/games/${id}`, { method: 'DELETE' });
 
-// ── DESENVOLVEDORAS ────────────────────────────────────────────
+
 export const getDevelopers    = ()                         => http<Developer[]>(`${API}/developers`);
 export const createDeveloper  = (data: Partial<Developer>) => http<{ id: number }>(`${API}/developers`, { method: 'POST', ...json(data) });
 export const deleteDeveloper  = (id: number)               => http<void>(`${API}/developers/${id}`, { method: 'DELETE' });
 
-// ── DISTRIBUIDORAS ─────────────────────────────────────────────
+
 export const getPublishers   = ()                         => http<Publisher[]>(`${API}/publishers`);
 export const createPublisher = (data: Partial<Publisher>) => http<{ id: number }>(`${API}/publishers`, { method: 'POST', ...json(data) });
 export const deletePublisher = (id: number)               => http<void>(`${API}/publishers/${id}`, { method: 'DELETE' });
 
-// ── LISTAS DE SUPORTE ──────────────────────────────────────────
+
 export const getPlatforms = () => http<Platform[]>(`${API}/platforms`);
 export const getGenres    = () => http<Genre[]>(`${API}/genres`);
 export const getRatings   = () => http<Rating[]>(`${API}/ratings`);

@@ -12,15 +12,11 @@ import ratingRoutes     from './routes/ratingRoutes';
 const app  = express();
 const PORT = process.env.PORT ?? 3000;
 
-// ---------------------------------------------------------------
-// Middlewares globais
-// ---------------------------------------------------------------
-app.use(cors());           // permite requisições do front-end React (porta 5173)
-app.use(express.json());   // parseia body JSON automaticamente
 
-// ---------------------------------------------------------------
-// Rotas da API
-// ---------------------------------------------------------------
+app.use(cors());
+app.use(express.json());
+
+
 app.use('/api/games',       gameRoutes);
 app.use('/api/developers',  developerRoutes);
 app.use('/api/publishers',  publisherRoutes);
@@ -28,14 +24,12 @@ app.use('/api/platforms',   platformRoutes);
 app.use('/api/genres',      genreRoutes);
 app.use('/api/ratings',     ratingRoutes);
 
-// Rota raiz — confirma que o servidor está no ar
+
 app.get('/', (_req, res) => res.json({ status: 'Catálogo de Jogos API rodando ✔' }));
 
-// ---------------------------------------------------------------
-// Inicialização
-// ---------------------------------------------------------------
+
 async function startServer(): Promise<void> {
-  await testConnection();   // valida conexão com o banco antes de abrir o servidor
+  await testConnection();
   app.listen(PORT, () => {
     console.log(`[Server] API rodando em http://localhost:${PORT}`);
     console.log(`[Server] Endpoints disponíveis:`);
