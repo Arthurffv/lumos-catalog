@@ -36,8 +36,8 @@ CREATE TABLE classificacao_indicativa (
 -- -------------------------------------------------------------
 CREATE TABLE desenvolvedora (
     id            SERIAL       PRIMARY KEY,
-    nome          VARCHAR(255) NOT NULL,
-    cnpj          VARCHAR(18)  UNIQUE,        -- Formato: XX.XXX.XXX/XXXX-XX
+    nome          VARCHAR(255) NOT NULL UNIQUE,
+    cnpj          VARCHAR(18)  UNIQUE CHECK (cnpj IS NULL OR cnpj ~ '^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$'),
     estudio       VARCHAR(255),
     diretor       VARCHAR(255),
     pais          VARCHAR(100),
@@ -49,8 +49,8 @@ CREATE TABLE desenvolvedora (
 -- -------------------------------------------------------------
 CREATE TABLE distribuidora (
     id    SERIAL       PRIMARY KEY,
-    nome  VARCHAR(255) NOT NULL,
-    cnpj  VARCHAR(18)  UNIQUE,               -- Formato: XX.XXX.XXX/XXXX-XX
+    nome  VARCHAR(255) NOT NULL UNIQUE,
+    cnpj  VARCHAR(18)  UNIQUE CHECK (cnpj IS NULL OR cnpj ~ '^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$'),
     pais  VARCHAR(100)
 );
 
@@ -89,7 +89,7 @@ CREATE TABLE jogos (
     categoria          VARCHAR(100),
     id_desenvolvedora  INT          REFERENCES desenvolvedora(id)         ON DELETE SET NULL,
     id_distribuidora   INT          REFERENCES distribuidora(id)          ON DELETE SET NULL,
-    data_lancamento    DATE,
+    data_lancamento    DATE         NOT NULL,
     id_classificacao   INT          REFERENCES classificacao_indicativa(id) ON DELETE SET NULL
 );
 
@@ -154,3 +154,4 @@ INSERT INTO plataforma (nome, empresa) VALUES
     ('Nintendo Switch','Nintendo'),
     ('PS4',            'Sony Interactive Entertainment'),
     ('Xbox One',       'Microsoft');
+
