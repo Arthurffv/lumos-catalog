@@ -1,7 +1,7 @@
 # 🎮 Lumos Catalog
 
 > Sistema de Banco de Dados relacional para cadastro e consulta de jogos digitais.
-> Projeto prático das disciplinas **CSI440 / CSI602 — Banco de Dados**
+> Projeto prático das disciplinas **CSI440 — Banco de Dados**
 > Universidade Federal de Ouro Preto (UFOP)
 
 ---
@@ -217,9 +217,9 @@ Acesse **http://localhost:5173** no navegador.
 ---
 
 ## 👥 Equipe
-Arthur Fernando Fernades Vasconcelos - 23.1.8072
-Arthur de Oliveira Formiga
-João Claudio Starling
+Arthur Fernando Fernades Vasconcelos - 23.1.8072<br>
+Arthur de Oliveira Formiga<br>
+João Claudio Starling<br>
 
 
-Projeto desenvolvido para as disciplinas CSI440 / CSI602 — UFOP
+Projeto desenvolvido para as disciplinas CSI440 — UFOP
