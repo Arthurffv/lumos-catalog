@@ -133,7 +133,7 @@ No pgAdmin com o banco `catalogo_jogos` selecionado:
 
 ### Passo 3 — Popular o banco (opcional)
 
-Para inserir 100 jogos de exemplo, repita o processo do Passo 2 com o arquivo `seed_100.sql`.
+Para inserir jogos de exemplo, repita o processo do Passo 2 com o arquivo `seed.sql`.
 
 ---
 
