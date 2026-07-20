@@ -67,7 +67,7 @@ classificacao_indicativa   desenvolvedora   distribuidora   plataforma   genero
 ```
 lumos-catalog/
 ├── schema.sql                        ← DDL completo (CREATE TABLE, índices, seed base)
-├── seed_100.sql                      ← 100 jogos para popular o banco
+├── seed.sql                          ← jogos para popular o banco 
 ├── package.json
 ├── tsconfig.json
 ├── .env.example                      ← modelo de variáveis de ambiente
